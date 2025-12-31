@@ -2,25 +2,32 @@ import json
 import os
 import requests
 import pg8000.native
+import boto3  # <--- NEW: AWS SDK to talk to Secrets Manager
 
 # --- CONFIGURATION ---
-# We use os.environ.get so the code reads from AWS secrets when running there,
-# but uses a placeholder when sitting on GitHub.
-DB_HOST = os.environ.get("DB_HOST", "tadawul-db.c8xyiyy40mmd.us-east-1.rds.amazonaws.com")
-DB_NAME = os.environ.get("DB_NAME", "tadawul")
-DB_USER = os.environ.get("DB_USER", "postgres")
-
-# 🔒 SECRET: Never hardcode this in the file you push to GitHub!
-DB_PASS = os.environ.get("DB_PASS", "PLACEHOLDER_PASSWORD")
-
-# 🔒 SECRET: Never hardcode this!
-API_KEY = os.environ.get("API_KEY", "PLACEHOLDER_API_KEY")
-
+SECRET_NAME = "tadawul-secrets"
+REGION_NAME = "us-east-1"
 SYMBOLS = ["TSLA", "NVDA", "AAPL"]
 
-def get_real_market_data(symbol):
+def get_secrets():
+    """
+    Fetch credentials from AWS Secrets Manager (The Vault).
+    """
+    session = boto3.session.Session()
+    client = session.client(service_name='secretsmanager', region_name=REGION_NAME)
+
     try:
-        url = f"https://api.twelvedata.com/time_series?symbol={symbol}&interval=1day&apikey={API_KEY}&outputsize=1"
+        get_secret_value_response = client.get_secret_value(SecretId=SECRET_NAME)
+        # The secret comes back as a JSON string, so we convert it to a Dictionary
+        secret = json.loads(get_secret_value_response['SecretString'])
+        return secret
+    except Exception as e:
+        print(f"❌ Failed to fetch secrets: {str(e)}")
+        raise e
+
+def get_real_market_data(symbol, api_key):
+    try:
+        url = f"https://api.twelvedata.com/time_series?symbol={symbol}&interval=1day&apikey={api_key}&outputsize=1"
         response = requests.get(url, timeout=10)
         data = response.json()
         
@@ -42,17 +49,28 @@ def get_real_market_data(symbol):
         return None
 
 def lambda_handler(event, context):
-    print("🚀 Starting US Tech Lambda ETL...")
+    print("🚀 Starting US Tech Lambda ETL (v2.0 - Secure Mode)...")
     results = []
     
-    conn = None
     try:
-        conn = pg8000.native.Connection(user=DB_USER, password=DB_PASS, host=DB_HOST, database=DB_NAME)
+        # 1. Open the Vault
+        print("🔐 Retrieving secrets from Vault...")
+        secrets = get_secrets()
+        
+        db_host = secrets['DB_HOST']
+        db_name = secrets['DB_NAME']
+        db_user = secrets['DB_USER']
+        db_pass = secrets['DB_PASS']
+        api_key = secrets['API_KEY']
+        
+        # 2. Connect to Database
+        conn = pg8000.native.Connection(user=db_user, password=db_pass, host=db_host, database=db_name)
         print("   ✅ Connected to Database")
 
+        # 3. Process Data
         for symbol in SYMBOLS:
             print(f"   📡 Fetching Real Data for {symbol}...")
-            data = get_real_market_data(symbol)
+            data = get_real_market_data(symbol, api_key)
             
             if not data:
                 continue
@@ -78,6 +96,5 @@ def lambda_handler(event, context):
         return {'statusCode': 200, 'body': json.dumps(results)}
 
     except Exception as e:
-        print(f"❌ Database Error: {str(e)}")
-        if conn: conn.close()
+        print(f"❌ Critical Error: {str(e)}")
         return {'statusCode': 500, 'body': json.dumps(f"Error: {str(e)}")}

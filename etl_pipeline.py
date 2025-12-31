@@ -3,20 +3,21 @@ import psycopg2
 import pandas as pd
 import os
 from datetime import datetime
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # --- CONFIGURATION ---
-DB_HOST = os.environ.get("DB_HOST", "tadawul-db.c8xyiyy40mmd.us-east-1.rds.amazonaws.com")
-DB_NAME = os.environ.get("DB_NAME", "tadawul")
-DB_USER = os.environ.get("DB_USER", "postgres")
-
-# 🔒 SAFE: No real password here
-DB_PASS = os.environ.get("DB_PASS", "PLACEHOLDER_PASS")
+DB_HOST = os.environ.get("DB_HOST")
+DB_NAME = os.environ.get("DB_NAME")
+DB_USER = os.environ.get("DB_USER")
+DB_PASS = os.environ.get("DB_PASS")
 
 # Updated to match the US Tech Pivot
 SYMBOLS = ["TSLA", "NVDA", "AAPL"]
 
 def extract_data(symbol):
-    """EXTRACT: Fetch yesterday's data from Yahoo Finance"""
+    """EXTRACT: Fetch data from Yahoo Finance"""
     print(f"   📡 Fetching data for {symbol}...")
     stock = yf.Ticker(symbol)
     df = stock.history(period="5d")
@@ -29,9 +30,8 @@ def load_data(symbol, df):
         return
 
     try:
-        # Safety check for placeholder password
-        if DB_PASS == "PLACEHOLDER_PASS":
-            print("   ⚠️  Skipping DB connection: Password is a placeholder.")
+        if not DB_PASS:
+            print("   ⚠️  Skipping DB connection: DB_PASS is missing.")
             return
 
         conn = psycopg2.connect(

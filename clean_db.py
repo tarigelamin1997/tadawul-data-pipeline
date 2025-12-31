@@ -1,18 +1,19 @@
 import psycopg2
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # --- CONFIGURATION ---
-DB_HOST = os.environ.get("DB_HOST", "tadawul-db.c8xyiyy40mmd.us-east-1.rds.amazonaws.com")
-DB_NAME = os.environ.get("DB_NAME", "tadawul")
-DB_USER = os.environ.get("DB_USER", "postgres")
-
-# 🔒 SAFE: No real password here
-DB_PASS = os.environ.get("DB_PASS", "PLACEHOLDER_PASS")
+DB_HOST = os.environ.get("DB_HOST")
+DB_NAME = os.environ.get("DB_NAME")
+DB_USER = os.environ.get("DB_USER")
+DB_PASS = os.environ.get("DB_PASS")
 
 def clean_database():
     try:
-        if DB_PASS == "PLACEHOLDER_PASS":
-            print("❌ Cannot connect: Password is a placeholder.")
+        if not DB_PASS:
+            print("❌ Error: DB_PASS missing from .env file.")
             return
 
         print("🧹 Connecting to database...")

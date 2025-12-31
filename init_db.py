@@ -1,20 +1,21 @@
 import psycopg2
-import os  # <--- Added this to read environment variables
-from psycopg2 import sql
+import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # --- CONFIGURATION ---
-DB_HOST = os.environ.get("DB_HOST", "tadawul-db.c8xyiyy40mmd.us-east-1.rds.amazonaws.com")
-DB_NAME = os.environ.get("DB_NAME", "tadawul")
-DB_USER = os.environ.get("DB_USER", "postgres")
-
-# 🔒 SAFE: No real password here!
-DB_PASS = os.environ.get("DB_PASS", "PLACEHOLDER_PASS")
+DB_HOST = os.environ.get("DB_HOST")
+DB_NAME = os.environ.get("DB_NAME")
+DB_USER = os.environ.get("DB_USER")
+DB_PASS = os.environ.get("DB_PASS")
 
 def init_database():
     try:
-        # Check if we are using the placeholder (Safety check)
-        if DB_PASS == "PLACEHOLDER_PASS":
-            print("⚠️  Cannot connect: Password is a placeholder. Set DB_PASS to run.")
+        # Check if password was loaded correctly
+        if not DB_PASS:
+            print("❌ Error: DB_PASS is missing. Check your .env file.")
             return
 
         print("1. Connecting to AWS RDS...")
@@ -29,7 +30,7 @@ def init_database():
         cursor = conn.cursor()
         print("   ✅ Connected successfully!")
 
-        # Define the table structure
+        # SQL to create the table
         create_table_query = """
         CREATE TABLE IF NOT EXISTS daily_prices (
             symbol VARCHAR(20) NOT NULL,
@@ -55,7 +56,7 @@ def init_database():
     except Exception as e:
         print("\n❌ Connection Failed:")
         print(e)
-        print("\nTroubleshooting Tip: If it says 'timeout', check your Security Group allows your IP.")
+        print("\nTroubleshooting Tip: If it says 'timeout', check your AWS Security Group.")
 
 if __name__ == "__main__":
-    init_database()
+    init_database()         
