@@ -1,21 +1,22 @@
 import psycopg2
-import os
-from dotenv import load_dotenv
-
-# Load environment variables from .env file
-load_dotenv()
+from aws_secrets import get_secrets
 
 # --- CONFIGURATION ---
-DB_HOST = os.environ.get("DB_HOST")
-DB_NAME = os.environ.get("DB_NAME")
-DB_USER = os.environ.get("DB_USER")
-DB_PASS = os.environ.get("DB_PASS")
+print("🔐 Fetching credentials from AWS Secrets Manager...")
+secrets = get_secrets()
+
+# Extract values using the EXACT keys from your screenshot
+DB_HOST = secrets['DB_HOST']
+DB_NAME = secrets['DB_NAME']
+DB_USER = secrets['DB_USER']
+DB_PASS = secrets['DB_PASS']
+# API_KEY = secrets['API_KEY'] # Not used here, but good to have available
 
 def init_database():
     try:
         # Check if password was loaded correctly
         if not DB_PASS:
-            print("❌ Error: DB_PASS is missing. Check your .env file.")
+            print("❌ Error: DB_PASS is missing. Check your AWS Secrets Manager.")
             return
 
         print("1. Connecting to AWS RDS...")
@@ -56,7 +57,7 @@ def init_database():
     except Exception as e:
         print("\n❌ Connection Failed:")
         print(e)
-        print("\nTroubleshooting Tip: If it says 'timeout', check your AWS Security Group.")
+        print("\nTroubleshooting Tip: Check your AWS Security Group and Secrets Manager permissions.")
 
 if __name__ == "__main__":
-    init_database()         
+    init_database()
