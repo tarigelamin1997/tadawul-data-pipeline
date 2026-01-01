@@ -5,7 +5,7 @@ st.set_page_config(
     page_icon="👋",
 )
 
-st.write("# Welcome to My Data Engineering Portfolio! 👋")
+st.write("# 🚀 Tarig's Live Data Engineering Portfolio")
 
 st.sidebar.success("Select a Project above.")
 
