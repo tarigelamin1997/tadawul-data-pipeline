@@ -1,5 +1,5 @@
 import psycopg2
-from aws_secrets import get_secrets
+from etl_lambda.aws_secrets import get_secrets
 
 # --- CONFIGURATION ---
 print("🔐 Fetching credentials from AWS Secrets Manager...")

@@ -1,0 +1,5 @@
+pandas
+psycopg2-binary
+yfinance
+boto3
+numpy<2.0.0
