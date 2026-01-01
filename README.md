@@ -61,19 +61,20 @@ Visualization      "Streamlit, Plotly"
 
 1. Clone the Repository
    git clone [https://github.com/tarigelamin1997/tadawul-data-pipeline.git](https://github.com/tarigelamin1997/tadawul-data-pipeline.git)
-cd tadawul-data-pipeline
+   
+   cd tadawul-data-pipeline
 
-2. Set up Environment Variables Create a .env file in the root directory:
+3. Set up Environment Variables Create a .env file in the root directory:
    DB_HOST=your_db_host
    DB_NAME=your_db_name
    DB_USER=your_db_user
    DB_PASS=your_db_password
    
-3. Run with Docker
+4. Run with Docker
    docker build -t stock-portfolio .
    docker run -p 8501:8501 --env-file .env stock-portfolio
 
-4. Access the App Open your browser and go to http://localhost:8501
+5. Access the App Open your browser and go to http://localhost:8501
 
 🔄 CI/CD Workflow
 The project implements a continuous deployment pipeline:
