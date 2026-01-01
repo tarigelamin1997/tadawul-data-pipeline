@@ -1,20 +1,51 @@
 import yfinance as yf
 import psycopg2
 import pandas as pd
-import os
+import boto3
+import json
 from datetime import datetime
-from dotenv import load_dotenv
+from aws_secrets import get_secrets  # Uses your new secure vault
 
-load_dotenv()
+# --- CONFIGURATION (UPDATED for v4 & v5) ---
+# Fetch credentials securely from AWS Secrets Manager
+print("🔐 Fetching credentials from AWS Secrets Manager...")
+secrets = get_secrets()
 
-# --- CONFIGURATION ---
-DB_HOST = os.environ.get("DB_HOST")
-DB_NAME = os.environ.get("DB_NAME")
-DB_USER = os.environ.get("DB_USER")
-DB_PASS = os.environ.get("DB_PASS")
+DB_HOST = secrets['DB_HOST']
+DB_NAME = secrets['DB_NAME']
+DB_USER = secrets['DB_USER']
+DB_PASS = secrets['DB_PASS']
 
-# Updated to match the US Tech Pivot
+# S3 Configuration for v5.0 Data Lake
+S3_BUCKET_NAME = "tadawul-data-lake-v1-tarig-elamin"
+
 SYMBOLS = ["TSLA", "NVDA", "AAPL"]
+
+def save_raw_to_s3(data: pd.DataFrame, symbol: str):
+    """
+    v5.0: Saves raw data to S3 (Bronze Layer) before processing.
+    Path format: raw/YYYY/MM/DD/symbol.json
+    """
+    s3 = boto3.client('s3')
+    
+    # Create partitioned path
+    today = datetime.now()
+    path = f"raw/{today.year}/{today.month:02d}/{today.day:02d}/{symbol}.json"
+    
+    # Convert DataFrame to JSON string
+    # orient='index' creates a structure like {date: {open: 100, close: 101}}
+    json_data = data.to_json(orient="index", date_format="iso")
+    
+    try:
+        s3.put_object(
+            Bucket=S3_BUCKET_NAME,
+            Key=path,
+            Body=json_data,
+            ContentType='application/json'
+        )
+        print(f"   🌊 Raw data saved to S3 Lake: {path}")
+    except Exception as e:
+        print(f"   ⚠️ Failed to save to S3: {e}")
 
 def extract_data(symbol):
     """EXTRACT: Fetch data from Yahoo Finance"""
@@ -71,11 +102,27 @@ def load_data(symbol, df):
         print(f"   ❌ Database Error: {e}")
 
 # --- MAIN EXECUTION ---
-if __name__ == "__main__":
+def lambda_handler(event, context):
+    """Standard entry point for AWS Lambda"""
     print("🚀 Starting ETL Pipeline (US Tech)...")
     
     for symbol in SYMBOLS:
+        # 1. Extract
         data = extract_data(symbol)
+        
+        # 2. Archive to S3 (The new v5 step)
+        if not data.empty:
+            save_raw_to_s3(data, symbol)
+        
+        # 3. Load to DB
         load_data(symbol, data)
         
     print("\n🏁 Pipeline Finished Successfully!")
+    return {
+        'statusCode': 200,
+        'body': json.dumps('ETL Job Completed')
+    }
+
+# For local testing
+if __name__ == "__main__":
+    lambda_handler(None, None)
