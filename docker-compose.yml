@@ -1,0 +1,7 @@
+version: '3.8'
+services:
+  web:
+    image: 058727361540.dkr.ecr.us-east-1.amazonaws.com/tadawul-portfolio:latest
+    ports:
+      - "80:8501"
+    restart: always
