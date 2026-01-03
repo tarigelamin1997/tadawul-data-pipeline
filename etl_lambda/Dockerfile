@@ -1,15 +1,16 @@
 # Use the official AWS Lambda Python image
 FROM public.ecr.aws/lambda/python:3.11
 
-# Copy requirements file
+# Copy requirements
 COPY requirements.txt ${LAMBDA_TASK_ROOT}
 
-# Install dependencies
+# Install dependencies (ensure numpy<2.0.0 is in requirements.txt)
 RUN pip install -r requirements.txt
 
-# Copy function code
-COPY lambda_function.py ${LAMBDA_TASK_ROOT}
+# --- UPDATED: COPY BOTH SCRIPTS ---
+COPY ingest.py ${LAMBDA_TASK_ROOT}
+COPY process.py ${LAMBDA_TASK_ROOT}
 COPY aws_secrets.py ${LAMBDA_TASK_ROOT}
 
-# Set the CMD to your handler (file_name.function_name)
-CMD [ "lambda_function.lambda_handler" ]
+# Default CMD (can be overridden in Lambda Console)
+CMD [ "ingest.lambda_handler" ]
