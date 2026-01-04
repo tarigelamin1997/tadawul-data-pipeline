@@ -1,95 +1,146 @@
-# 🚀 US Tech Stock Data Pipeline & Portfolio
+📈 Event-Driven Financial Data Pipeline & Dashboard
+A robust, end-to-end cloud engineering project that automates the ingestion, processing, storage, and visualization of high-frequency financial market data using a serverless, event-driven architecture.
 
-![Python](https://img.shields.io/badge/Python-3.11-blue?logo=python&logoColor=white)
-![AWS](https://img.shields.io/badge/AWS-Lambda%20%7C%20RDS%20%7C%20Beanstalk-orange?logo=amazon-aws&logoColor=white)
-![Docker](https://img.shields.io/badge/Docker-Containerized-2496ED?logo=docker&logoColor=white)
-![CI/CD](https://img.shields.io/badge/CI%2FCD-GitHub%20Actions-green?logo=github-actions&logoColor=white)
+🖼️ Project Overview
+This project represents a modern Cloud-Native Data Pipeline designed to track US Tech stocks (TSLA, AAPL, NVDA). Unlike traditional static dashboards, this system utilizes an Event-Driven Architecture where data ingestion triggers automated processing workflows in the cloud.
 
-## 📊 Live Demo
-👉 **View the Live Dashboard:** [http://tarig-portfolio.us-east-1.elasticbeanstalk.com/](http://tarig-portfolio.us-east-1.elasticbeanstalk.com/)
+The goal was to move beyond simple scripts and build a production-grade system that handles the full lifecycle of data: from raw API extraction to persistent storage in a relational database, served via a containerized frontend application.
 
----
+🎯 Key Features
+Real-Time Visualization: Interactive charts built with Plotly & Streamlit showing multi-year price history.
 
-## 💡 Project Overview
-This project is a full-stack **Data Engineering** solution that automates the extraction, transformation, and loading (ETL) of US Tech stock market data.
+Event-Driven ETL: Data processing is triggered automatically by S3 upload events (Serverless).
 
-It features a **Cloud-Native Architecture** where data is fetched daily via serverless functions, stored in a relational database, and visualized on a dynamic dashboard hosted on AWS. The entire application is containerized and deployed via a fully automated CI/CD pipeline.
+Automated CI/CD: Zero-touch deployment pipeline using GitHub Actions and AWS Elastic Beanstalk.
 
-### 🌟 Key Features
-* **Automated ETL:** Daily scheduled extraction of stock data (TSLA, AAPL, NVDA) using **AWS Lambda** & **EventBridge**.
-* **Cloud Storage:** Persistent data storage in **AWS RDS (PostgreSQL)**.
-* **Visualization:** Interactive dashboard built with **Streamlit** & **Plotly**.
-* **Containerization:** Application runs in a **Docker** container for consistent environments.
-* **CI/CD Pipeline:** Automated build, test, and deploy workflow using **GitHub Actions**, **AWS ECR**, and **Elastic Beanstalk**.
+Containerized Environment: Fully Dockerized application ensuring consistency between development and production.
 
----
+Secure Infrastructure: Database credentials and API keys managed via environment variables and GitHub Secrets.
 
-## 🏗️ Architecture
+🏗️ System Architecture
+The system follows a microservices-inspired flow, separating concerns between extraction, transformation, storage, and presentation.
 
-```mermaid
-graph TD
-    subgraph "Data Ingestion Layer"
-        API[External Stock API] -->|JSON| Lambda[AWS Lambda Function]
-        Cron[EventBridge Scheduler] -->|Trigger Daily| Lambda
-    end
+graph LR
+    A[External API] -->|Fetch Data| B(AWS Lambda / Script)
+    B -->|Upload Raw JSON| C[AWS S3 Bucket]
+    C -->|S3 Event Trigger| D[ETL Processor (Lambda)]
+    D -->|Clean & Transform| E[(AWS RDS PostgreSQL)]
+    E -->|Query Data| F[Streamlit Dashboard]
+    F -->|Serve| G[End User]
+    style F fill:#00C853,stroke:#333,stroke-width:2px
+    style E fill:#3F51B5,stroke:#333,stroke-width:2px
 
-    subgraph "Storage Layer"
-        Lambda -->|Write Data| RDS[(AWS RDS PostgreSQL)]
-    end
+Ingestion: A fetcher script retrieves market data and deposits raw JSON files into an AWS S3 bucket.
 
-    subgraph "Presentation Layer"
-        User(User) -->|HTTP Request| EB[AWS Elastic Beanstalk]
-        EB -->|SQL Query| RDS
-    end
-    
-    subgraph "DevOps & CI/CD"
-        Dev[Developer] -->|Git Push| GH[GitHub Actions]
-        GH -->|Build & Push| ECR[Amazon ECR]
-        GH -->|Deploy| EB
-    end
-```
-Domain             Tools Used
-Cloud Provider     AWS (US-East-1)
-Compute            "AWS Lambda (Serverless), Elastic Beanstalk (PaaS)"
-Storage            "AWS RDS (PostgreSQL), Secrets Manager"
-Orchestration      AWS EventBridge (Scheduler)
-Containerization   "Docker, Amazon ECR"
-CI/CD              GitHub Actions
-Visualization      "Streamlit, Plotly"
+Processing (ETL): An AWS Lambda function is triggered immediately upon file upload. It parses the JSON, validates schema, and cleans the data.
 
-🚀 How to Run Locally
+Storage: Cleaned data is upserted into an AWS RDS (PostgreSQL) database, ensuring ACID compliance and data integrity.
 
-1. Clone the Repository
-   git clone [https://github.com/tarigelamin1997/tadawul-data-pipeline.git](https://github.com/tarigelamin1997/tadawul-data-pipeline.git)
-   
-   cd tadawul-data-pipeline
+Deployment: The frontend dashboard is packaged as a Docker container and deployed to AWS Elastic Beanstalk.
 
-3. Set up Environment Variables Create a .env file in the root directory:
-   DB_HOST=your_db_host
-   DB_NAME=your_db_name
-   DB_USER=your_db_user
-   DB_PASS=your_db_password
-   
-4. Run with Docker
-   docker build -t stock-portfolio .
-   docker run -p 8501:8501 --env-file .env stock-portfolio
+🛠️ Technical Stack
+Cloud Infrastructure (AWS)
+Elastic Beanstalk (Docker Platform): Orchestrates the deployment of the dashboard application.
 
-5. Access the App Open your browser and go to http://localhost:8501
+RDS (PostgreSQL): Managed relational database service for persistent storage.
 
-🔄 CI/CD Workflow
-The project implements a continuous deployment pipeline:
+S3 (Simple Storage Service): Data lake for raw JSON ingestion.
 
-Source Control: Code is pushed to the main branch.
+Lambda (Serverless): Compute service for event-driven ETL tasks.
 
-GitHub Actions:
+Application Layer
+Python 3.11: Core programming language.
 
-Authenticates with AWS.
+Streamlit: Framework for the interactive web interface.
 
-Builds the Docker image.
+Plotly Graph Objects: Advanced data visualization library.
 
-Pushes the image to Amazon ECR.
+SQLAlchemy: ORM for secure and efficient database interactions.
 
-Updates the Elastic Beanstalk environment with the new version.
+Pandas: High-performance data manipulation and analysis.
+
+DevOps & Tooling
+Docker: Containerization for reproducible builds (Multi-stage builds).
+
+GitHub Actions: CI/CD pipeline for automated testing and deployment.
+
+Git: Version control with branching strategies.
+
+🚀 Deployment & CI/CD Pipeline
+The project utilizes a Continuous Deployment strategy. Every commit to the main branch triggers a GitHub Actions workflow that automatically updates the production server.
+
+Workflow Steps (deploy.yml):
+
+Checkout Code: Pulls the latest code from the repository.
+
+Generate Deployment Package: Compresses the application (excluding virtual environments and unnecessary files).
+
+Deploy to AWS: Uses the einaregilsson/beanstalk-deploy action to push the zip file to Elastic Beanstalk.
+
+Version Management: Handles versioning automatically using Git commit hashes.
+
+Note: The pipeline includes safety checks (e.g., use_existing_version_if_available) to prevent deployment failures during rapid iterations.
+
+💻 Local Development Setup
+To run this project locally, follow these steps:
+
+Prerequisites
+Docker Desktop installed
+
+Python 3.11+
+
+Git
+
+Installation
+1. Clone the repository:
+git clone https://github.com/YourUsername/tadawul-data-pipeline.git
+cd tadawul-data-pipeline
+
+2. Set up Environment Variables Create a .env file in the root directory:
+DB_USER=postgres
+DB_PASS=your_password
+DB_HOST=localhost
+DB_NAME=tadawul
+
+3. Run with Docker
+docker build -t tech-dashboard .
+docker run -p 8501:8501 --env-file .env tech-dashboard
+
+4. Access the Dashboard Open your browser and navigate to http://localhost:8501
+
+🛡️ Engineering Challenges & Solutions
+During development, several critical engineering challenges were solved:
+
+1. Cross-Platform Dependency Management ("Dependency Hell")
+Problem: The local environment (Windows) produced a requirements.txt with dependencies incompatible with the AWS Linux environment (e.g., pywin32, specific binary wheels), causing the build to fail with Exit Code 1.
+
+Solution: Implemented a clean-slate strategy for requirements. Instead of freezing the entire local environment, I curated a minimal requirements.txt listing only top-level dependencies. This allows the Docker container to resolve and compile the correct Linux-compatible binaries during the build process.
+
+2. The "Ghost" Deployment (Git Indexing)
+Problem: eb deploy reported success, but the production site showed old code. This was because the deployment tool relies on the Git Index, not the local file system.
+
+Solution: Established a strict workflow of Stage -> Commit -> Push before deployment, ensuring the CI/CD pipeline always picks up the latest committed changes.
+
+3. Library Stability vs. Novelty
+Problem: Attempting to use beta versions of financial libraries (pandas-ta) and bleeding-edge numpy (v2.0+) caused internal conflict crashes in the Docker container.
+
+Solution: Prioritized System Stability. I engineered the requirements.txt to pin numpy<2.0.0 to ensure compatibility and removed unstable beta libraries, opting for robust, standard implementation of moving averages using native Pandas functions.
+
+🔮 Future Improvements
+Alerting System: Integrate AWS SNS to send SMS/Email alerts when a stock crosses a "Golden Cross" threshold.
+
+IaC (Infrastructure as Code): Migrate manual AWS setup to Terraform or CloudFormation scripts.
+
+Unit Testing: Add pytest suite to the CI pipeline to validate data integrity before deployment.
 
 👨‍💻 Author
-Tarig Elamin Data Engineer | Cloud Specialist LinkedIn Profile: www.linkedin.com/in/tarigelamin
+Tarig Elamin
+
+Cloud Engineer | Data Engineer
+
+Specializing in Python, AWS, and DevOps Automation.
+
+LinkedIn Profile: www.linkedin.com/in/tarigelamin
+
+📄 License
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
