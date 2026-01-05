@@ -1,3 +1,12 @@
+# 📈 Stock (Tadawul) Data Pipeline
+
+[![Live Demo](https://img.shields.io/badge/Live_Demo-tarigelamin.com-2ea44f?style=for-the-badge&logo=amazonaws)](https://tarigelamin.com)
+
+**🚀 LIVE DASHBOARD:** [https://tarigelamin.com](https://tarigelamin.com)
+
+A robust ETL pipeline that extracts live market data, stores it in PostgreSQL on AWS RDS, and visualizes trends using Streamlit.
+
+
 📈 Event-Driven Financial Data Pipeline & Dashboard
 A robust, end-to-end cloud engineering project that automates the ingestion, processing, storage, and visualization of high-frequency financial market data using a serverless, event-driven architecture.
 
