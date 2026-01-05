@@ -1,0 +1,1 @@
+{"last_found_secrets": [{"match": "aeef29d64865722bc9c73b85ef30b4cecabeaf1a358583fc506777eed7b7f8cd", "name": "Generic High Entropy Secret - .env"}, {"match": "65ffbeb4b0f11afb28db2b5399f9b2628080b03e2a1e0babfb2596ae35256f4f", "name": "Authentication Tuple - lambda_package\\websockets\\sync\\server.py"}]}
