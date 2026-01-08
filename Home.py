@@ -10,7 +10,7 @@ st.set_page_config(
 
 # --- SIDEBAR INFO ---
 with st.sidebar:
-    st.image("https://avatars.githubusercontent.com/u/155386000?v=4", width=150) # Using your GitHub avatar as placeholder
+    st.image("images/profile.jpg", width=150) # Using your GitHub avatar as placeholder
     st.markdown("### Tarig Elamin")
     st.markdown("Cloud Data Architect & Engineer")
     st.markdown("📍 Riyadh, Saudi Arabia")
