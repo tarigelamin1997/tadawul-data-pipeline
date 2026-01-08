@@ -52,7 +52,7 @@ st.subheader("🏗️ Architecture & Data Flow")
 # Load Image (Make sure the file exists in the 'images' folder!)
 try:
     image_arch = Image.open("images/pipeline_architecture.png")
-    st.image(image_arch, caption="AWS Serverless Lakehouse Architecture", use_column_width=True)
+    st.image(image_arch, caption="AWS Serverless Lakehouse Architecture", use_container_width=True)
 except FileNotFoundError:
     st.error("⚠️ Image not found. Please upload 'images/pipeline_architecture.png'")
 
@@ -106,7 +106,7 @@ with tab1:
     st.markdown("#### Amazon QuickSight Dashboard")
     try:
         image_dash = Image.open("images/quicksight_dashboard.png")
-        st.image(image_dash, caption="Real-time analysis of stock news frequency", use_column_width=True)
+        st.image(image_dash, caption="Real-time analysis of stock news frequency", use_container_width=True)
     except FileNotFoundError:
         st.warning("Upload 'images/quicksight_dashboard.png'")
 
@@ -114,6 +114,6 @@ with tab2:
     st.markdown("#### Apache Airflow DAGs")
     try:
         image_airflow = Image.open("images/airflow_dags.png")
-        st.image(image_airflow, caption="Daily scheduled ingestion jobs (Green = Success)", use_column_width=True)
+        st.image(image_airflow, caption="Daily scheduled ingestion jobs (Green = Success)", use_container_width=True)
     except FileNotFoundError:
         st.warning("Upload 'images/airflow_dags.png'")
